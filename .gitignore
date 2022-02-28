@@ -351,5 +351,5 @@ MigrationBackup/
 
 # Miscellaneous
 .DS_Store
-.exe
+*.exe
 
