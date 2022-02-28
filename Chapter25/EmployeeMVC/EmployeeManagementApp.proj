@@ -1,0 +1,140 @@
+<Project DefaultTargets="Run"
+         xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		
+	<PropertyGroup>
+	  <IncludeDebugInformation>false</IncludeDebugInformation>
+    <CommonDir>common</CommonDir>
+	  <CommandDir>commands</CommandDir>
+	  <AppDir>controller</AppDir>
+	  <ExceptionDir>exceptions</ExceptionDir>
+	  <ModelDir>model</ModelDir>
+	  <ViewDir>view</ViewDir>
+	  <UtilDir>utils</UtilDir>
+	  <BuildDir>build</BuildDir>
+	  <LibDir>lib</LibDir>
+	  
+	</PropertyGroup>
+	
+		 
+    <ItemGroup>
+    <COMMON Include="common\**\*.cs" />
+	  <COMMANDS Include="commands\**\*.cs" />
+	  <APP Include="controller\**\*.cs" />
+	  <EXCEPTIONS Include="exceptions\**\*.cs" />
+    <UTILS Include="utils\**\*.cs" />
+	  <MODEL Include="model\**\*.cs" />
+	  <VIEW Include="view\**\*.cs" />
+	  <LIB Include="lib\**\*.dll" />
+	  
+	</ItemGroup>
+	
+	<Target Name="MakeDirs">
+	  <MakeDir Directories="$(BuildDir)" />
+	  <MakeDir Directories="$(LibDir)" />
+	</Target>
+	
+	<Target Name="RemoveDirs">
+	  <RemoveDir Directories="$(BuildDir)" />
+	  <RemoveDir Directories="$(LibDir)" />
+	</Target>
+	
+	<Target Name="Clean"
+	        DependsOnTargets="RemoveDirs;MakeDirs">
+	</Target>
+	
+	<Target Name="CopyFiles">
+	  <Copy
+	     SourceFiles="@(LIB)"
+		 DestinationFolder="$(BuildDir)" />
+	</Target>
+	
+	<Target Name="CompileCommon"
+	        Inputs="@(COMMON)"
+			Outputs="$(LibDir)\Common.dll">
+	    <Csc Sources="@(COMMON)"
+		     TargetType="library"
+			 References="@(LIB)"
+			 WarningLevel="0"
+			 OutputAssembly="$(LibDir)\Common.dll">
+	    </Csc>
+	</Target>
+  
+	<Target Name="CompileCommands"
+	         Inputs="@(COMMANDS)"
+			 Outputs="$(LibDir)\Commands.dll"
+			 DependsOnTargets="CompileCommon">
+	    <Csc Sources="@(COMMANDS)"
+		     TargetType="library"
+			 References="@(LIB)"
+			 WarningLevel="0"
+			 OutputAssembly="$(LibDir)\Commands.dll">
+		</Csc>
+	</Target>
+	
+	<Target Name="CompileExceptions"
+	         Inputs="@(EXCEPTIONS)"
+			 Outputs="$(LibDir)\Exceptions.dll"
+			 DependsOnTargets="CompileCommon">
+	    <Csc Sources="@(EXCEPTIONS)"
+		     TargetType="library"
+			 References="@(LIB)"
+			 WarningLevel="0"
+			 OutputAssembly="$(LibDir)\Exceptions.dll">
+		</Csc>
+	</Target>
+	
+	<Target Name="CompileUtils"
+	         Inputs="@(UTILS)"
+			 Outputs="$(LibDir)\Utils.dll"
+			 DependsOnTargets="CompileExceptions;CompileCommon">
+	    <Csc Sources="@(UTILS)"
+		     TargetType="library"
+			 References="@(LIB)"
+			 WarningLevel="0"
+			 OutputAssembly="$(LibDir)\Utils.dll">
+		</Csc>
+	</Target>
+	
+	<Target Name="CompileModel"
+	         Inputs="@(MODEL)"
+			 Outputs="$(LibDir)\Model.dll"
+			 DependsOnTargets="CompileCommon">
+	    <Csc Sources="@(MODEL)"
+		     TargetType="library"
+			 References="@(LIB)"
+			 WarningLevel="0"
+			 OutputAssembly="$(LibDir)\Model.dll">
+		</Csc>
+	</Target>
+	
+	<Target Name="CompileView"
+	         Inputs="@(VIEW)"
+			 Outputs="$(LibDir)\View.dll"
+			 DependsOnTargets="CompileCommon">
+	    <Csc Sources="@(VIEW)"
+		     TargetType="library"
+			 References="@(LIB)"
+			 WarningLevel="0"
+			 OutputAssembly="$(LibDir)\View.dll">
+		</Csc>
+	</Target>
+	
+	<Target Name="CompileApp"
+	         Inputs="@(APP)"
+			 Outputs="$(BuildDir)\$(MSBuildProjectName).exe"
+			 DependsOnTargets="CompileCommon;CompileExceptions;CompileCommands;CompileUtils;CompileModel;CompileView">
+	    <Csc Sources="@(APP)"
+		     TargetType="winexe"
+			 References="@(LIB)"
+			 WarningLevel="0"
+			 OutputAssembly="$(BuildDir)\$(MSBuildProjectName).exe">
+		</Csc>
+	</Target>
+	
+  <Target Name="Run" 
+          DependsOnTargets="CompileApp;CopyFiles">
+      <Exec Command="$(MSBuildProjectName).exe"
+            WorkingDirectory="$(BuildDir)" />
+    </Target>
+		 
+</Project>
